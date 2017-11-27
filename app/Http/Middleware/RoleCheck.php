@@ -6,8 +6,10 @@ use Closure;
 use Dingo\Api\Routing\Helpers;
 use Illuminate\Contracts\Auth\Factory as Auth;
 
-class Authenticate
+class RoleCheck
 {
+    use Helpers;
+
     /**
      * The authentication guard factory instance.
      *
@@ -29,15 +31,22 @@ class Authenticate
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  string|null  $guard
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure                 $next
+     * @param string|null              $guard
+     *
      * @return mixed
      */
-    public function handle($request, Closure $next, $guard = null)
+    public function handle($request, Closure $next, $role)
     {
-        if ($this->auth->guard($guard)->guest()) {
-            return $this->response->errorUnauthorized();
+        $roles = [];
+        $fields = ['admin', 'editor', 'user']; // hight to low
+
+        foreach ($fields as $field) {
+            $roles[] = $field;
+            if ($role == $field && !in_array($this->auth->user()->role, $roles)) {
+                return $this->response->errorForbidden('Permission denied.');
+            }
         }
 
         return $next($request);

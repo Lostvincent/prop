@@ -34,7 +34,13 @@ class PropController extends Controller
 
     public function show($prop_id)
     {
-        $prop = Prop::findOrFail($prop_id);
+        Relation::create([
+            'referer'       =>  'bgm',
+            'subject_id'    =>  68813,
+            'prop_id'       =>  1
+        ]);
+        dd(1);
+        $prop = Prop::with('aliases')->findOrFail($prop_id);
 
         return $this->response->array(['data' => $prop]);
     }

@@ -28,6 +28,6 @@ class CreateAliasesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('alias');
+        Schema::dropIfExists('aliases');
     }
 }

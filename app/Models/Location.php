@@ -6,14 +6,13 @@ use OwenIt\Auditing\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 
-class Relation extends Model implements AuditableContract
+class Location extends Model implements AuditableContract
 {
     use Auditable;
 
     public $timestamps = false;
 
     protected $guarded = [];
-    protected $primaryKey = 'subject_id';
 
     /**
      * Auditable events.
@@ -22,6 +21,7 @@ class Relation extends Model implements AuditableContract
      */
     protected $auditableEvents = [
         'created',
+        'updated',
         'deleted',
     ];
 
@@ -35,8 +35,8 @@ class Relation extends Model implements AuditableContract
         return $this->belongsTo('App\Models\Subject');
     }
 
-    public function character()
+    public function ep()
     {
-        return $this->belongsTo('App\Models\Character');
+        return $this->belongsTo('App\Models\EP');
     }
 }

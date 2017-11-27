@@ -27,7 +27,7 @@ $app->withFacades();
 
 $app->withEloquent();
 
-foreach (['api', 'jwt', 'auth', 'image', 'filesystems'] as $module) {
+foreach (['api', 'audit', 'jwt', 'auth', 'image', 'filesystems'] as $module) {
     $app->configure($module);
 }
 
@@ -68,6 +68,7 @@ $app->middleware([
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
+    'role' => App\Http\Middleware\RoleCheck::class,
 ]);
 
 /*
@@ -88,6 +89,7 @@ $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 $app->register(Illuminate\Filesystem\FilesystemServiceProvider::class);
 $app->register(Nord\Lumen\Cors\CorsServiceProvider::class);
 $app->register(Intervention\Image\ImageServiceProvider::class);
+$app->register(OwenIt\Auditing\AuditingServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
 app('Dingo\Api\Auth\Auth')->extend('jwt', function ($app) {

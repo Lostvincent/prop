@@ -20,7 +20,7 @@ $api->version('v1', [
     $api->post('login', 'AuthController@login');
     $api->delete('logout', ['uses' => 'AuthController@logout', 'middleware' => 'api.auth']);
 
-    $api->group(['prefix' => 'prop'], function ($api) {
+    $api->group(['prefix' => 'prop'], function ($api) { // , 'middleware' => 'api.auth'
         $api->get('/', 'PropController@index');
         $api->get('{id}', 'PropController@show');
     });
@@ -30,14 +30,20 @@ $api->version('v1', [
         $api->group(['prefix' => 'prop'], function ($api) {
             $api->post('/', 'PropController@store');
             $api->put('{id}', 'PropController@update');
-            $api->delete('{id}', 'PropController@destory');
+            $api->delete('{id}', ['uses' => 'PropController@destory', 'middleware' => 'role:editor']);
 
             $api->post('{id}/cover', 'PropController@updateCover');
         });
 
         $api->group(['prefix' => 'relation'], function ($api) {
             $api->post('/', 'RelationController@store');
-            $api->delete('/', 'RelationController@destroy');
+            $api->delete('/', ['uses' => 'RelationController@destroy', 'middleware' => 'role:editor']);
+        });
+
+        $api->group(['prefix' => 'location'], function ($api) {
+            $api->post('/', 'LocationController@store');
+            $api->put('{id}', ['uses' => 'LocationController@destroy', 'middleware' => 'role:editor']);
+            $api->delete('{id}', ['uses' => 'LocationController@destroy', 'middleware' => 'role:editor']);
         });
 
         // category
