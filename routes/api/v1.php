@@ -33,6 +33,9 @@ $api->version('v1', [
             $api->delete('{id}', ['uses' => 'PropController@destory', 'middleware' => 'role:editor']);
 
             $api->post('{id}/cover', 'PropController@updateCover');
+
+            $api->post('{id}/alias', 'AliasController@store');
+            $api->delete('{prop_id}/alias/{id}', 'AliasController@destroy');
         });
 
         $api->group(['prefix' => 'relation'], function ($api) {
@@ -42,7 +45,7 @@ $api->version('v1', [
 
         $api->group(['prefix' => 'location'], function ($api) {
             $api->post('/', 'LocationController@store');
-            $api->put('{id}', ['uses' => 'LocationController@destroy', 'middleware' => 'role:editor']);
+            $api->put('{id}', 'LocationController@update');
             $api->delete('{id}', ['uses' => 'LocationController@destroy', 'middleware' => 'role:editor']);
         });
 

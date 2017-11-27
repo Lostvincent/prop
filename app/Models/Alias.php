@@ -14,6 +14,16 @@ class Alias extends Model implements AuditableContract
 
     protected $guarded = [];
 
+    /**
+     * Auditable events.
+     *
+     * @var array
+     */
+    protected $auditableEvents = [
+        'created',
+        'deleted',
+    ];
+
     public function prop()
     {
         return $this->belongsTo('App\Models\Prop');

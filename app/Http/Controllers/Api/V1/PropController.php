@@ -34,12 +34,6 @@ class PropController extends Controller
 
     public function show($prop_id)
     {
-        Relation::create([
-            'referer'       =>  'bgm',
-            'subject_id'    =>  68813,
-            'prop_id'       =>  1
-        ]);
-        dd(1);
         $prop = Prop::with('aliases')->findOrFail($prop_id);
 
         return $this->response->array(['data' => $prop]);
@@ -59,7 +53,7 @@ class PropController extends Controller
 
         $file = $request->file('image');
         if (!$file->isValid()) {
-            throw new ValidationHttpException(['image' => '封面图片格式不正确。']);
+            throw new ValidationHttpException(['image' => 'Cover image invalid.']);
         }
         $path = with(new ImageService($file, 250))->save();
 

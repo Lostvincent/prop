@@ -51,6 +51,7 @@ class RelationController extends Controller
         } else {
             $relation = $relation->whereNull('character_id');
         }
+        $relation = $relation->first();
         $relation->delete();
 
         return $this->response->noContent();
