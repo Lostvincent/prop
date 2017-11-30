@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Prop;
 use App\Models\Alias;
+use App\Models\Location;
 use App\Models\Relation;
 use Illuminate\Http\Request;
 use App\Services\ImageService;
@@ -14,27 +15,82 @@ class PropController extends Controller
     {
         $this->validate($request, [
             'referer'       =>  'string|in:bgm,mal',
-            'subject_id'    =>  'required|integer|min:0',
-            'character_id'  =>  'integer|min:0',
+            'subject_id'    =>  'integer|min:1',
+            'character_id'  =>  'required_without:subject_id|integer|min:1',
         ]);
 
-        $relations = Relation::where(['referer' => $request->input('referer', 'bgm'), 'subject_id' => $request->input('subject_id')]);
-        if (!empty($request->input('character_id'))) {
-            $relations = $relations->where('character_id', $request->input('character_id'));
+        $relations = Relation::where(['referer' => !empty($request->input('referer')) ? $request->input('referer') : 'bgm']);
+        foreach (['subject_id', 'character_id'] as $field) {
+            if (!empty($request->input($field))) {
+                $relations = $relations->where($field, $request->input($field));
+            }
         }
         $relations = $relations->pluck('prop_id');
 
         $props = [];
         if (!empty($relations)) {
-            $props = Prop::whereIn('id', $relations)->orderBy('id', 'desc')->get();
+            $props = Prop::whereIn('id', $relations)->orderBy('id', 'desc')->get()->keyBy('id');
+
+            $points = [];
+            if (!empty($request->input('subject_id'))) {
+                $locations = Location::where(['referer' => !empty($request->input('referer')) ? $request->input('referer') : 'bgm', 'subject_id' => $request->input('subject_id')])->whereIn('prop_id', $props->pluck('id'))->get();
+            }
+            foreach ($locations as $location) {
+                if (empty($points[$location->prop_id][$location->ep_id])) {
+                    $points[$location->prop_id][$location->ep_id] = 0;
+                }
+                $points[$location->prop_id][$location->ep_id] ++;
+            }
+            foreach ($points as $prop_id => $point) {
+                $props[$prop_id]['points'] = $point;
+            }
+            $props = $props->values();
         }
 
         return $this->response->array(['data' => $props]);
     }
 
-    public function show($prop_id)
+    public function show(Request $request, $prop_id)
     {
+        $this->validate($request, [
+            'referer'   =>  'string|in:bgm,mal',
+        ]);
+
         $prop = Prop::with('aliases')->findOrFail($prop_id);
+
+        $locations = [];
+        $raw_locations = Location::where(['referer' => !empty($request->input('referer')) ? $request->input('referer') : 'bgm', 'prop_id' => $prop->id])->get();
+        foreach ($raw_locations as $raw_location) {
+            if (!isset($locations[$raw_location['subject_id']])) {
+                $locations[$raw_location['subject_id']] = [
+                    'subject_id'    =>  $raw_location['subject_id'],
+                    // 'name'          =>  '',
+                    // 'cover'         =>  '',
+                    'eps'           =>  []
+                ];
+            }
+
+            if (!isset($locations[$raw_location['subject_id']]['eps'][$raw_location['ep_id']])) {
+                $locations[$raw_location['subject_id']]['eps'][$raw_location['ep_id']] = [
+                    'ep_id'     =>  $raw_location['ep_id'],
+                    // 'name'      =>  '',
+                    'points'    =>  []
+                ];
+            }
+
+            $locations[$raw_location['subject_id']]['eps'][$raw_location['ep_id']]['points'][] = [
+                'min'       =>  $raw_location['min'],
+                'sec'       =>  $raw_location['sec'],
+                'length'    =>  $raw_location['length'],
+            ];
+        }
+
+        sort($locations);
+        foreach ($locations as &$location) {
+            sort($location['eps']);
+        }
+
+        $prop['locations'] = $locations;
 
         return $this->response->array(['data' => $prop]);
     }

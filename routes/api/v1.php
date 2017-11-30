@@ -15,8 +15,6 @@ $api = app('Dingo\Api\Routing\Router');
 $api->version('v1', [
     'namespace' => 'App\Http\Controllers\Api\V1'
 ], function ($api) {
-    $api->get('/', 'HomeController@index');
-
     $api->post('login', 'AuthController@login');
     $api->delete('logout', ['uses' => 'AuthController@logout', 'middleware' => 'api.auth']);
 
@@ -34,7 +32,7 @@ $api->version('v1', [
 
             $api->post('{id}/cover', 'PropController@updateCover');
 
-            $api->post('{id}/alias', 'AliasController@store');
+            $api->post('{prop_id}/alias', 'AliasController@store');
             $api->delete('{prop_id}/alias/{id}', 'AliasController@destroy');
         });
 

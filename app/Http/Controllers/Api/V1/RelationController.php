@@ -11,9 +11,9 @@ class RelationController extends Controller
     {
         $this->validate($request, [
             'referer'       =>  'required|string|in:bgm,mal',
-            'subject_id'    =>  'required|integer|min:0',
-            'character_id'  =>  'integer|min:0',
-            'prop_id'       =>  'required|integer|min:0|exists:props,id'
+            'subject_id'    =>  'required|integer|min:1',
+            'character_id'  =>  'integer|min:1',
+            'prop_id'       =>  'required|integer|min:1|exists:props,id'
         ]);
 
         $relation = Relation::where(['subject_id' => $request->input('subject_id'), 'prop_id' => $request->input('prop_id')]);
@@ -40,9 +40,9 @@ class RelationController extends Controller
     {
         $this->validate($request, [
             'referer'       =>  'required|string|in:bgm,mal',
-            'subject_id'    =>  'required|integer|min:0',
-            'character_id'  =>  'integer|min:0',
-            'prop_id'       =>  'required|integer|min:0'
+            'subject_id'    =>  'required|integer|min:1',
+            'character_id'  =>  'integer|min:1',
+            'prop_id'       =>  'required|integer|min:1'
         ]);
 
         $relation = Relation::where(['subject_id' => $request->input('subject_id'), 'prop_id' => $request->input('prop_id')]);

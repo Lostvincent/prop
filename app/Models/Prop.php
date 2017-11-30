@@ -35,6 +35,11 @@ class Prop extends Model implements AuditableContract
         return $this->hasMany('App\Models\Alias');
     }
 
+    public function locations()
+    {
+        return $this->hasMany('App\Models\Location');
+    }
+
     public function getImageAttribute($image)
     {
         return config('filesystems.disks.public.url').'/'.($image == '' ? 'default.jpg' : $image);

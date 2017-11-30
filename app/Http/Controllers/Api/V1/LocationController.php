@@ -11,12 +11,12 @@ class LocationController extends Controller
     {
         $this->validate($request, [
             'referer'       =>  'required|string|in:bgm,mal',
-            'subject_id'    =>  'required|integer|min:0',
-            'ep_id'         =>  'required|integer|min:0',
-            'prop_id'       =>  'required|integer|min:0|exists:props,id',
+            'subject_id'    =>  'required|integer|min:1',
+            'ep_id'         =>  'required|integer|min:1',
+            'prop_id'       =>  'required|integer|min:1|exists:props,id',
             'min'           =>  'required|integer|min:0|max:255',
             'sec'           =>  'required|integer|min:0|max:60',
-            'length'        =>  'required|integer|min:0',
+            'length'        =>  'required|integer|min:1',
         ]);
 
         $this->check($request);
@@ -39,7 +39,7 @@ class LocationController extends Controller
             'referer'       =>  'required|string|in:bgm,mal',
             'min'           =>  'required|integer|min:0|max:255',
             'sec'           =>  'required|integer|min:0|max:60',
-            'length'        =>  'required|integer|min:0',
+            'length'        =>  'required|integer|min:1',
         ]);
 
         $location = Location::findOrFail($location_id);
@@ -57,7 +57,9 @@ class LocationController extends Controller
 
     public function destroy(Request $request, $location_id)
     {
-        Location::where('id', $location_id)->delete();
+        $location = Location::findOrFail($location_id);
+        // code...
+        $location->delete();
 
         return $this->response->noContent();
     }
