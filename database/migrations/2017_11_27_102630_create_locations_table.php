@@ -22,6 +22,7 @@ class CreateLocationsTable extends Migration
             $table->tinyInteger('min')->unsigned();
             $table->tinyInteger('sec')->unsigned();
             $table->integer('length')->unsigned();
+            $table->string('image');
         });
     }
 

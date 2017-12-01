@@ -39,4 +39,9 @@ class Location extends Model implements AuditableContract
     {
         return $this->belongsTo('App\Models\EP');
     }
+
+    public function getImageAttribute($image)
+    {
+        return config('filesystems.disks.public.url').'/'.($image == '' ? 'default.jpg' : $image);
+    }
 }

@@ -79,9 +79,11 @@ class PropController extends Controller
             }
 
             $locations[$raw_location['subject_id']]['eps'][$raw_location['ep_id']]['points'][] = [
+                'id'        =>  $raw_location['id'],
                 'min'       =>  $raw_location['min'],
                 'sec'       =>  $raw_location['sec'],
                 'length'    =>  $raw_location['length'],
+                'image'     =>  $raw_location['image'],
             ];
         }
 

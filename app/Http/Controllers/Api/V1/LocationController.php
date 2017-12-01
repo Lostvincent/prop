@@ -17,9 +17,16 @@ class LocationController extends Controller
             'min'           =>  'required|integer|min:0|max:255',
             'sec'           =>  'required|integer|min:0|max:60',
             'length'        =>  'required|integer|min:1',
+            'image'         =>  'required|image'
         ]);
 
         $this->check($request);
+
+        $file = $request->file('image');
+        if (!$file->isValid()) {
+            throw new ValidationHttpException(['image' => 'Cover image invalid.']);
+        }
+        $path = with(new ImageService($file, 250))->save();
 
         $location = Location::create([
             'referer'       =>  $request->input('referer'),
@@ -28,6 +35,7 @@ class LocationController extends Controller
             'min'           =>  $request->input('min'),
             'sec'           =>  $request->input('sec'),
             'length'        =>  $request->input('length'),
+            'image'         =>  $path
         ]);
 
         return $this->response()->array(['data' => $location])->setStatusCode(201);
@@ -40,16 +48,26 @@ class LocationController extends Controller
             'min'           =>  'required|integer|min:0|max:255',
             'sec'           =>  'required|integer|min:0|max:60',
             'length'        =>  'required|integer|min:1',
+            'image'         =>  'image'
         ]);
 
         $location = Location::findOrFail($location_id);
 
         $this->check($request, $location);
 
+        if (!empty($request->file('image'))) {
+            $file = $request->file('image');
+            if (!$file->isValid()) {
+                throw new ValidationHttpException(['image' => 'Cover image invalid.']);
+            }
+            $path = with(new ImageService($file, 250))->save();
+        }
+
         $location->update([
             'min'       =>  $request->input('min'),
             'sec'       =>  $request->input('sec'),
             'length'    =>  $request->input('length'),
+            'image'     =>  !empty($path) ? $path : $location->getOriginal('image'),
         ]);
 
         return $this->response()->array(['data' => $location])->setStatusCode(201);
