@@ -19,8 +19,14 @@ $api->version('v1', [
     $api->delete('logout', ['uses' => 'AuthController@logout', 'middleware' => 'api.auth']);
 
     $api->group(['prefix' => 'prop'], function ($api) { // , 'middleware' => 'api.auth'
+        $api->get('search', 'PropController@search');
+
         $api->get('/', 'PropController@index');
         $api->get('{id}', 'PropController@show');
+    });
+
+    $api->group(['prefix' => 'location'], function ($api) {
+        $api->get('bar', 'LocationController@getBar');
     });
 
     $api->group(['middleware' => 'api.auth'], function ($api)
@@ -42,9 +48,12 @@ $api->version('v1', [
         });
 
         $api->group(['prefix' => 'location'], function ($api) {
+            $api->get('/', 'LocationController@index');
             $api->post('/', 'LocationController@store');
             $api->put('{id}', 'LocationController@update');
             $api->delete('{id}', ['uses' => 'LocationController@destroy', 'middleware' => 'role:editor']);
+
+            // $api->get('bar', 'LocationController@getBar');
         });
 
         // category

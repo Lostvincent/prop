@@ -32,7 +32,7 @@ class ImageService
         $filePath = $this->disk->get($path);
         $img = app('image')->make($filePath);
         if ($this->max_width > 0 && $this->max_height == 0) {
-            $img->resize($this->max_width, null, function ($constraint) {
+            $img->resize(min($this->max_width, $img->width()), null, function ($constraint) {
                 $constraint->aspectRatio();
             });
         } else {

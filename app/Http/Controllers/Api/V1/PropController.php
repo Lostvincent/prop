@@ -29,7 +29,7 @@ class PropController extends Controller
 
         $props = [];
         if (!empty($relations)) {
-            $props = Prop::whereIn('id', $relations)->orderBy('id', 'desc')->get()->keyBy('id');
+            $props = Prop::with('aliases')->whereIn('id', $relations)->orderBy('id', 'desc')->get()->keyBy('id');
 
             $points = [];
             if (!empty($request->input('subject_id'))) {
@@ -183,7 +183,7 @@ class PropController extends Controller
 
         $file = $request->file('image');
         if (!$file->isValid()) {
-            throw new ValidationHttpException(['image' => '封面图片格式不正确。']);
+            throw new ValidationHttpException(['image' => 'Cover image invalid.']);
         }
         $path = with(new ImageService($file, 250))->save();
         with(new ImageService($prop->getOriginal('image')))->delete();
@@ -191,5 +191,18 @@ class PropController extends Controller
         $prop->update(['image' => $path]);
 
         return $this->response->array(['data' => ['path' => $prop->image]])->setStatusCode(201);
+    }
+
+    public function search(Request $request)
+    {
+        $this->validate($request, [
+            'name'  =>  'required|string'
+        ]);
+
+        $aliases = Alias::where('name', 'LIKE', '%'.$request->input('name').'%')->get();
+
+        $props = Prop::with('aliases')->select('id', 'name', 'image')->whereIn('id', $aliases->pluck('prop_id'))->orWhere('name', 'LIKE', '%'.$request->input('name').'%')->limit(10)->get();
+
+        return $this->response()->array(['data' => $props]);
     }
 }

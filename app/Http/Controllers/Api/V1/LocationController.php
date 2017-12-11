@@ -3,10 +3,34 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Location;
 use Illuminate\Http\Request;
+use App\Services\ImageService;
 use App\Http\Controllers\Controller;
+use App\Transformers\DataTransformer;
 
 class LocationController extends Controller
 {
+    public function index(Request $request)
+    {
+        $this->validate($request, [
+            'referer'       =>  'string|in:bgm,mal',
+            'subject_id'    =>  'integer|min:1',
+            'ep_id'         =>  'integer|min:1',
+            'prop_id'       =>  'integer|min:1'
+        ]);
+
+        $search = array_filter($request->only('subject_id', 'ep_id', 'prop_id'), function ($var) {
+            return !empty($var);
+        });
+
+        $locations = Location::where(['referer' => !empty($request->input('referer')) ? $request->input('referer') : 'bgm']);
+        foreach ($search as $field => $value) {
+            $locations = $locations->where($field, $value);
+        }
+        $locations = $locations->orderBy('id', 'DESC')->paginate(20);
+
+        return $this->response()->paginator($locations, new DataTransformer);
+    }
+
     public function store(Request $request)
     {
         $this->validate($request, [
@@ -32,13 +56,14 @@ class LocationController extends Controller
             'referer'       =>  $request->input('referer'),
             'subject_id'    =>  $request->input('subject_id'),
             'ep_id'         =>  $request->input('ep_id'),
+            'prop_id'       =>  $request->input('prop_id'),
             'min'           =>  $request->input('min'),
             'sec'           =>  $request->input('sec'),
             'length'        =>  $request->input('length'),
             'image'         =>  $path
         ]);
 
-        return $this->response()->array(['data' => $location])->setStatusCode(201);
+        return $this->response->array(['data' => $location])->setStatusCode(201);
     }
 
     public function update(Request $request, $location_id)
@@ -70,7 +95,7 @@ class LocationController extends Controller
             'image'     =>  !empty($path) ? $path : $location->getOriginal('image'),
         ]);
 
-        return $this->response()->array(['data' => $location])->setStatusCode(201);
+        return $this->response->array(['data' => $location])->setStatusCode(201);
     }
 
     public function destroy(Request $request, $location_id)
@@ -80,6 +105,24 @@ class LocationController extends Controller
         $location->delete();
 
         return $this->response->noContent();
+    }
+
+    public function getBar(Request $request)
+    {
+        $this->validate($request, [
+            'referer'       =>  'string|in:bgm,mal',
+            'subject_id'    =>  'required|integer|min:1',
+            'ep_id'         =>  'required|integer|min:1',
+            'prop_id'       =>  'required|integer|min:1'
+        ]);
+
+        $locations = Location::where(['referer' => !empty($request->input('referer')) ? $request->input('referer') : 'bgm']);
+        foreach (['subject_id', 'ep_id', 'prop_id'] as $field) {
+            $locations = $locations->where($field, $request->input($field));
+        }
+        $locations = $locations->get();
+
+        return $this->response->array(['data' => $locations]);
     }
 
     private function check(Request $request, $location = null)

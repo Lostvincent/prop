@@ -28,7 +28,6 @@ class AuthController extends Controller
         $data = [
             'token'      => $token,
             'expired_at' => Carbon::now()->addMinutes(config('jwt.ttl'))->format('Y-m-d H:i:s'),
-            'user'       => $user->toArray()
         ];
         
         return $this->response->array($data);
